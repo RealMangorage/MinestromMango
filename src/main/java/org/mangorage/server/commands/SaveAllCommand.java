@@ -1,0 +1,14 @@
+package org.mangorage.server.commands;
+
+import org.mangorage.server.MangoServer;
+
+public class SaveAllCommand extends MangoServerCommand {
+    public SaveAllCommand(MangoServer server) {
+        super(server, "saveAll");
+
+        setDefaultExecutor(((sender, context) -> {
+            sender.sendMessage("Saving All...");
+            server.saveAll(sender::sendMessage);
+        }));
+    }
+}
