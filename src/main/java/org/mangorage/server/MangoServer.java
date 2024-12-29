@@ -8,7 +8,9 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.anvil.AnvilLoader;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -86,7 +88,11 @@ public class MangoServer {
     }
 
     public void createLevel(NamespaceID id, BiConsumer<NamespaceID, InstanceContainer> consumer) {
-        InstanceContainer container = instanceManager.createInstanceContainer();
+        createLevel(id, DimensionType.OVERWORLD, consumer);
+    }
+
+    public void createLevel(NamespaceID id, DynamicRegistry.Key<DimensionType> dimensionType, BiConsumer<NamespaceID, InstanceContainer> consumer) {
+        InstanceContainer container = instanceManager.createInstanceContainer(dimensionType);
         consumer.accept(id, container);
         levels.computeIfAbsent(id, k -> container);
     }

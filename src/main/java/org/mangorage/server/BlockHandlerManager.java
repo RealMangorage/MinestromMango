@@ -11,18 +11,14 @@ import java.util.Map;
 public final class BlockHandlerManager {
     private final Map<Block, BlockHandler> blockHandlerMap = new HashMap<>();
 
-    public void register(Block block, BlockHandler handler) {
-        blockHandlerMap.put(block, handler);
-        MinecraftServer.getBlockManager()
-                .registerHandler(
-                        handler.getNamespaceId(),
-                        () -> handler
-                );
-    }
-
     public void register(BlockHandler handler, Block... blocks) {
         for (Block block : blocks) {
-            register(block, handler);
+            blockHandlerMap.put(block, handler);
+            MinecraftServer.getBlockManager()
+                    .registerHandler(
+                            handler.getNamespaceId(),
+                            () -> handler
+                    );
         }
     }
 

@@ -5,6 +5,9 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.inventory.AbstractInventory;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
@@ -13,6 +16,7 @@ import org.mangorage.server.recipie.RecipeManager;
 import org.mangorage.server.recipie.ShapedRecipe;
 import org.mangorage.server.recipie.ShapelessRecipe;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -20,22 +24,23 @@ public final class Listeners {
     private final RecipeManager manager = new RecipeManager();
 
 
-    public ItemStack[] getItems(PlayerInventory playerInventory) {
-        ItemStack[] stacks = new ItemStack[4];
-        stacks[0] = playerInventory.getItemStack(37);
-        stacks[1] = playerInventory.getItemStack(38);
-        stacks[2] = playerInventory.getItemStack(39);
-        stacks[3] = playerInventory.getItemStack(40);
-        return stacks;
+    public ItemStack[] getItems(AbstractInventory inv, boolean is3x3) {
+        if (!is3x3) {
+            return Arrays.copyOfRange(inv.getItemStacks(), 37, 40);
+        } else {
+            return Arrays.copyOfRange(inv.getItemStacks(), 1, 10);
+        }
     }
 
-    public void shrinkCrafting(PlayerInventory inventory) {
-        for (int i = 37; i <= 40; i++) {
-            var item = inventory.getItemStack(i);
+    public void shrinkCrafting(AbstractInventory inv, boolean is3x3) {
+        int from = is3x3 ? 1 : 37;
+        int to = is3x3 ? 9 : 40;
+        for (int i = from; i <= to; i++) {
+            var item = inv.getItemStack(i);
             if (item.isAir() || item.amount() == 1) {
-                inventory.setItemStack(i, ItemStack.AIR, true);
+                inv.setItemStack(i, ItemStack.AIR, true);
             } else {
-                inventory.setItemStack(
+                inv.setItemStack(
                         i,
                         item.withAmount(
                                 item.amount() - 1
@@ -44,12 +49,12 @@ public final class Listeners {
                 );
             }
         }
-        inventory.update();
+        inv.update();
     }
 
-    public ItemStack updateCraftingView(PlayerInventory inventory) {
-        var result = manager.getResult(getItems(inventory));
-        inventory.setItemStack(36, result, true);
+    public ItemStack updateCraftingView(AbstractInventory inventory, boolean is3x3) {
+        var result = manager.getResult(getItems(inventory, is3x3));
+        inventory.setItemStack(is3x3 ? 0 : 36, result, true);
         return result;
     }
 
@@ -92,14 +97,15 @@ public final class Listeners {
         });
 
         handler.addListener(InventoryClickEvent.class, event -> {
+            System.out.println(event.getSlot());
             // 37 -> 40
 
             // 36 Output
             if (event.getInventory() instanceof PlayerInventory playerInventory) {
                 if (event.getSlot() >= 37 && event.getSlot() <= 40) {
-                    updateCraftingView(playerInventory);
+                    updateCraftingView(playerInventory, false);
                 } else if (event.getSlot() == 36) {
-                    var result = updateCraftingView(playerInventory); // Verify
+                    var result = updateCraftingView(playerInventory, false); // Verify
                     if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
                         playerInventory.setItemStack(36, event.getClickedItem(), true);
                         playerInventory.setCursorItem(event.getCursorItem());
@@ -118,9 +124,39 @@ public final class Listeners {
                             );
                         }
                     }
-                    shrinkCrafting(playerInventory);
+                    shrinkCrafting(playerInventory, false);
                     playerInventory.setItemStack(36, ItemStack.AIR, true);
-                    updateCraftingView(playerInventory);
+                    updateCraftingView(playerInventory, false);
+                }
+            } else if (event.getInventory() instanceof Inventory inventory) {
+                if (inventory.getInventoryType().equals(InventoryType.CRAFTING)) {
+                    if (event.getSlot() != 0) {
+                        updateCraftingView(inventory, true);
+                    } else if (event.getSlot() == 0) {
+                        var result = updateCraftingView(inventory, true); // Verify
+                        if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
+                            inventory.setItemStack(0, event.getClickedItem(), true);
+                            inventory.setCursorItem(event.getPlayer(), event.getCursorItem());
+                            return;
+                        } else if (!event.getCursorItem().isAir()) {
+                            if ( (event.getCursorItem().amount() + result.amount()) > result.material().maxStackSize()) {
+                                inventory.setItemStack(0, event.getClickedItem(), true);
+                                inventory.setCursorItem(event.getPlayer(), event.getCursorItem());
+                                return;
+                            } else {
+                                inventory.setCursorItem(
+                                        event.getPlayer(),
+                                        ItemStack.of(
+                                                result.material(),
+                                                event.getCursorItem().amount() + result.amount()
+                                        )
+                                );
+                            }
+                        }
+                        shrinkCrafting(inventory, true);
+                        inventory.setItemStack(0, ItemStack.AIR, true);
+                        updateCraftingView(inventory, true);
+                    }
                 }
             }
         });
