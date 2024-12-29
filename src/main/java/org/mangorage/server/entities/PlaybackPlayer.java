@@ -34,6 +34,7 @@ public class PlaybackPlayer extends Entity {
         if (skinTexture != null && skinSignature != null) {
             properties.add(new PlayerInfoUpdatePacket.Property("textures", skinTexture, skinSignature));
         }
+
         var entry = new PlayerInfoUpdatePacket.Entry(
                 getUuid(),
                 username,
@@ -43,7 +44,7 @@ public class PlaybackPlayer extends Entity {
                 GameMode.SURVIVAL,
                 Component.text("Testing"), // Display Name
                 null, // Chat Session
-                1 // List Order
+                0
         );
         player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
 

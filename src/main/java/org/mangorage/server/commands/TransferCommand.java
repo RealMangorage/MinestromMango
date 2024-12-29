@@ -13,9 +13,12 @@ public class TransferCommand extends Command {
 
         addSyntax((sender, context) -> {
             if (sender instanceof Player player) {
-                player.getPlayerConnection().sendPacket(
-                        new TransferPacket("localhost", context.get(portArgument))
+                player.sendPacket(
+                        new TransferPacket(
+                                "127.0.0.1", 25566
+                        )
                 );
+                player.getPlayerConnection().disconnect();
             }
         }, portArgument);
     }

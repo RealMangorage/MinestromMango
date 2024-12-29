@@ -33,12 +33,16 @@ public class MangoServer {
     private final Random random = new Random();
     private final BlockHandlerManager manager = new BlockHandlerManager();
     private final Map<NamespaceID, InstanceContainer> levels = new HashMap<>();
-    private final MinecraftServer server = MinecraftServer.init();
-    private final ServerProcess serverProcess = MinecraftServer.process();
-    private final InstanceManager instanceManager = serverProcess.instance();
+    private final MinecraftServer server;
+    private final ServerProcess serverProcess;
+    private final InstanceManager instanceManager;
 
     private MangoServer(String id) {
         this.id = id;
+        this.server = MinecraftServer.init();
+        this.serverProcess = MinecraftServer.process();
+        this.instanceManager = serverProcess.instance();
+
         Path directory = Path.of("spark");
         SparkMinestom.builder(directory)
                 .commands(true) // enables registration of Spark commands
