@@ -95,7 +95,7 @@ public class MangoServer {
         spinnner.execute(() ->  server.start(ip, port));
     }
 
-    public BlockHandlerManager getManager() {
+    public BlockHandlerManager getBlockManager() {
         return manager;
     }
 

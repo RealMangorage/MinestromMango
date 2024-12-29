@@ -5,7 +5,6 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +18,12 @@ public final class BlockHandlerManager {
                         handler.getNamespaceId(),
                         () -> handler
                 );
+    }
+
+    public void register(BlockHandler handler, Block... blocks) {
+        for (Block block : blocks) {
+            register(block, handler);
+        }
     }
 
     public void register(GlobalEventHandler handler) {
