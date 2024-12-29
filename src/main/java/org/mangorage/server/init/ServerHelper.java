@@ -16,6 +16,7 @@ import net.minestom.server.world.DimensionType;
 import org.mangorage.server.Listeners;
 import org.mangorage.server.MangoServer;
 import org.mangorage.server.block.handlers.CraftingTableBlockHandler;
+import org.mangorage.server.block.handlers.FurnaceBlockHandler;
 import org.mangorage.server.commands.GameModeCommand;
 import org.mangorage.server.commands.SaveAllCommand;
 import org.mangorage.server.commands.TeleportCommand;
@@ -37,6 +38,11 @@ public class ServerHelper {
                             .register(
                                     new CraftingTableBlockHandler(),
                                     Block.CRAFTING_TABLE
+                            );
+            server.getBlockManager()
+                            .register(
+                                    new FurnaceBlockHandler(),
+                                    Block.FURNACE
                             );
 
             server.createLevel(

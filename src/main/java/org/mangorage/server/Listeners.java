@@ -3,6 +3,7 @@ package org.mangorage.server;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.inventory.InventoryClickEvent;
+import net.minestom.server.event.inventory.InventoryCloseEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.inventory.AbstractInventory;
@@ -12,12 +13,22 @@ import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.recipe.Ingredient;
+import net.minestom.server.recipe.Recipe;
+import net.minestom.server.recipe.RecipeBookCategory;
+import net.minestom.server.recipe.RecipeProperty;
+import net.minestom.server.recipe.display.RecipeDisplay;
+import net.minestom.server.recipe.display.SlotDisplay;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mangorage.server.recipie.RecipeManager;
 import org.mangorage.server.recipie.ShapedRecipe;
 import org.mangorage.server.recipie.ShapelessRecipe;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public final class Listeners {
@@ -26,7 +37,7 @@ public final class Listeners {
 
     public ItemStack[] getItems(AbstractInventory inv, boolean is3x3) {
         if (!is3x3) {
-            return Arrays.copyOfRange(inv.getItemStacks(), 37, 40);
+            return Arrays.copyOfRange(inv.getItemStacks(), 37, 41);
         } else {
             return Arrays.copyOfRange(inv.getItemStacks(), 1, 10);
         }
@@ -69,16 +80,100 @@ public final class Listeners {
         );
 
         manager.register(
-                new ShapedRecipe(
+                new ShapelessRecipe(
                         List.of(
-                                Material.OAK_PLANKS,
-                                Material.OAK_PLANKS,
-                                Material.OAK_PLANKS,
-                                Material.OAK_PLANKS
-                        ).toArray(Material[]::new),
-                        () -> ItemStack.of(Material.CRAFTING_TABLE, 1)
+                                Material.WHITE_WOOL,
+                                Material.RED_DYE
+                        ),
+                        () -> ItemStack.of(Material.RED_WOOL)
                 )
         );
+
+        manager.register(
+                ShapedRecipe.create()
+                        .setChar('X', Material.OAK_PLANKS)
+                        .build(
+                               """
+                               XX
+                               XX
+                               """,
+                                () -> ItemStack.of(Material.OAK_PLANKS, 4)
+                        )
+        );
+
+        manager.register(
+                ShapedRecipe.create()
+                        .setChar('I', Material.IRON_INGOT)
+                        .setChar('A', Material.AIR)
+                        .setChar('S', Material.STICK)
+                        .build(
+                                """
+                                III
+                                ASA
+                                ASA
+                                """,
+                                () -> ItemStack.of(Material.IRON_PICKAXE)
+                        )
+        );
+
+        manager.register(
+                ShapedRecipe.create()
+                        .setChar('I', Material.IRON_INGOT)
+                        .setChar('A', Material.AIR)
+                        .build(
+                                """
+                                IA
+                                AI
+                                """,
+                                () -> ItemStack.of(Material.SHEARS)
+                        )
+        );
+
+        MinecraftServer.process().recipe()
+                .addRecipe(
+                        new Recipe() {
+                            @Override
+                            public @Nullable String recipeBookGroup() {
+                                return "test";
+                            }
+
+                            @Override
+                            public @Nullable RecipeBookCategory recipeBookCategory() {
+                                return RecipeBookCategory.CRAFTING_MISC;
+                            }
+
+                            @Override
+                            public @Nullable List<Ingredient> craftingRequirements() {
+                                return List.of(
+                                        new Ingredient(
+                                                List.of(
+                                                        Material.OAK_LOG
+                                                )
+                                        )
+                                );
+                            }
+
+                            @Override
+                            public @NotNull List<RecipeDisplay> createRecipeDisplays() {
+                                return List.of(
+                                        new RecipeDisplay.CraftingShapeless(
+                                                List.of(
+                                                        new SlotDisplay.Item(Material.OAK_LOG)
+                                                ),
+                                                new SlotDisplay.ItemStack(ItemStack.of(Material.OAK_PLANKS, 4)),
+                                                new SlotDisplay.Item(Material.CRAFTING_TABLE)
+                                        )
+                                );
+                            }
+
+                            @Override
+                            public @NotNull Map<RecipeProperty, List<Material>> itemProperties() {
+                                Map<RecipeProperty, List<Material>> l = new HashMap<>();
+                                l.put(RecipeProperty.FURNACE_INPUT, List.of(Material.RAW_IRON));
+                                return l;
+                            }
+                        }
+                );
 
         GlobalEventHandler handler = MinecraftServer.getGlobalEventHandler();
 
@@ -96,8 +191,15 @@ public final class Listeners {
                 event.setCancelled(true);
         });
 
+        handler.addListener(InventoryCloseEvent.class, event -> {
+            if (event.getInventory() instanceof Inventory inventory) {
+                for (@NotNull ItemStack stack : inventory.getItemStacks()) {
+                    event.getPlayer().getInventory().addItemStack(stack);
+                }
+            }
+        });
+
         handler.addListener(InventoryClickEvent.class, event -> {
-            System.out.println(event.getSlot());
             // 37 -> 40
 
             // 36 Output

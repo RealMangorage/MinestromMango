@@ -3,12 +3,10 @@ package org.mangorage.server.recipie;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ShapelessRecipe implements Recipe {
+public final class ShapelessRecipe implements Recipe {
     private final List<Material> materials;
     private final Supplier<ItemStack> result;
 
