@@ -8,7 +8,7 @@ import net.minestom.server.entity.Player;
 
 public class GameModeCommand extends Command {
     public GameModeCommand() {
-        super("setGamemode");
+        super("gamemode");
 
         var gamemodeArgument = ArgumentType.Enum("gamemode", GameMode.class);
         gamemodeArgument.setFormat(ArgumentEnum.Format.LOWER_CASED);
