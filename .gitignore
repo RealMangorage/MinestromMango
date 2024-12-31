@@ -1,4 +1,6 @@
-/spark/
-/build/
-/.idea/
-/gradle/
+/spark/**
+/build/**
+/.idea/**
+/gradle/**
+/data/**
+/.gradle/**
