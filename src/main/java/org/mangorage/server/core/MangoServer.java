@@ -1,4 +1,4 @@
-package org.mangorage.server;
+package org.mangorage.server.core;
 
 import me.lucko.spark.minestom.SparkMinestom;
 import net.minestom.server.MinecraftServer;
@@ -33,17 +33,18 @@ public class MangoServer {
 
     private final String id;
     private final Random random = new Random();
-    private final BlockHandlerManager manager = new BlockHandlerManager();
     private final Map<NamespaceID, InstanceContainer> levels = new HashMap<>();
     private final MinecraftServer server;
     private final ServerProcess serverProcess;
     private final InstanceManager instanceManager;
+    private final MangoBlockManager manager;
 
     private MangoServer(String id) {
         this.id = id;
         this.server = MinecraftServer.init();
         this.serverProcess = MinecraftServer.process();
         this.instanceManager = serverProcess.instance();
+        this.manager = new MangoBlockManager(serverProcess);
 
         Path directory = Path.of("spark");
         SparkMinestom.builder(directory)
@@ -105,7 +106,7 @@ public class MangoServer {
         spinnner.execute(() ->  server.start(ip, port));
     }
 
-    public BlockHandlerManager getBlockManager() {
+    public MangoBlockManager getBlockManager() {
         return manager;
     }
 

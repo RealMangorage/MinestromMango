@@ -1,9 +1,10 @@
-package org.mangorage.server.init;
+package org.mangorage.server.core.init;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.exception.ExceptionHandler;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -13,15 +14,18 @@ import net.minestom.server.network.packet.client.handshake.ClientHandshakePacket
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.Difficulty;
 import net.minestom.server.world.DimensionType;
-import org.mangorage.server.Listeners;
-import org.mangorage.server.MangoServer;
+import org.mangorage.server.block.handlers.LavaBlockHandler;
+import org.mangorage.server.core.Listeners;
+import org.mangorage.server.core.MangoServer;
 import org.mangorage.server.block.handlers.CraftingTableBlockHandler;
 import org.mangorage.server.block.handlers.FurnaceBlockHandler;
+import org.mangorage.server.block.placement.FacingBlockPlacementRule;
 import org.mangorage.server.commands.GameModeCommand;
 import org.mangorage.server.commands.SaveAllCommand;
 import org.mangorage.server.commands.TeleportCommand;
 import org.mangorage.server.commands.TransferCommand;
-import org.mangorage.server.generators.BasicGrassGenerator;
+import org.mangorage.server.generators.GeneratorList;
+import org.mangorage.server.generators.SimpleTerrainGenerator;
 
 public class ServerHelper {
     public static void startServer(int port, String sid) {
@@ -45,6 +49,26 @@ public class ServerHelper {
                                     Block.FURNACE
                             );
 
+            server.getBlockManager()
+                    .registerPlacementRule(
+                            FacingBlockPlacementRule::new,
+                            Block.FURNACE,
+                            Block.BLAST_FURNACE,
+                            Block.CHEST
+                    );
+
+            server.getServerProcess()
+                    .exception()
+                    .setExceptionHandler(e -> {
+
+                    });
+
+            server.getBlockManager()
+                    .register(
+                            new LavaBlockHandler(),
+                            Block.LAVA
+                    );
+
             server.createLevel(
                     NamespaceID.from("mangorage:main"),
                     (id, level) -> {
@@ -58,7 +82,9 @@ public class ServerHelper {
                             player.getInventory().addItemStack(ItemStack.of(Material.OAK_LOG, 64));
                         }));
 
-                        level.setGenerator(new BasicGrassGenerator(server.getRandom().nextLong()));
+                        level.setGenerator(new GeneratorList()
+                                .add(new SimpleTerrainGenerator())
+                        );
                         level.setChunkSupplier(LightingChunk::new);
                         level.setChunkLoader(server.createLoader(id));
                     }

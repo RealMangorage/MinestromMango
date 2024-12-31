@@ -1,4 +1,4 @@
-package org.mangorage.server.init;
+package org.mangorage.server.core.init;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

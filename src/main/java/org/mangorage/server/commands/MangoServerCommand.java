@@ -3,7 +3,7 @@ package org.mangorage.server.commands;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mangorage.server.MangoServer;
+import org.mangorage.server.core.MangoServer;
 
 public class MangoServerCommand extends Command {
     private final MangoServer server;

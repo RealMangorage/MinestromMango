@@ -1,6 +1,6 @@
 package org.mangorage.server.commands;
 
-import org.mangorage.server.MangoServer;
+import org.mangorage.server.core.MangoServer;
 
 public class SaveAllCommand extends MangoServerCommand {
     public SaveAllCommand(MangoServer server) {

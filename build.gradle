@@ -22,6 +22,10 @@ repositories {
     maven {
         url = "https://oss.sonatype.org/content/repositories/snapshots/"
     } // spark-common's dependencies
+
+    maven {
+        url = "https://maven.minecraftforge.net/"
+    }
 }
 
 dependencies {
@@ -32,6 +36,7 @@ dependencies {
 
     implementation("de.articdive:jnoise:3.0.2")
     implementation("dev.lu15:spark-minestom:1.10-SNAPSHOT")
+
 }
 
 test {

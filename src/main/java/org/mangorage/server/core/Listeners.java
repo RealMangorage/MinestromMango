@@ -1,4 +1,4 @@
-package org.mangorage.server;
+package org.mangorage.server.core;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
@@ -178,12 +178,15 @@ public final class Listeners {
         GlobalEventHandler handler = MinecraftServer.getGlobalEventHandler();
 
         handler.addListener(PlayerBlockBreakEvent.class, event -> {
-            event.getPlayer().getInventory().addItemStack(
-                   ItemStack.of(
-                           Material.fromNamespaceId(event.getBlock().namespace()),
-                           1
-                   )
-           );
+            var material = Material.fromNamespaceId(event.getBlock().namespace());
+            if (material != null) {
+                event.getPlayer().getInventory().addItemStack(
+                        ItemStack.of(
+                                material,
+                                1
+                        )
+                );
+            }
         });
 
         handler.addListener(InventoryPreClickEvent.class, event -> {

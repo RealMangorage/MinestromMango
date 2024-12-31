@@ -1,4 +1,4 @@
-package org.mangorage.server.init;
+package org.mangorage.server.core.init;
 
 
 public class Main {
