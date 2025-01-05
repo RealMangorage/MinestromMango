@@ -1,0 +1,4 @@
+rootProject.name = 'MangoMinestomServer'
+include 'server'
+include 'example'
+

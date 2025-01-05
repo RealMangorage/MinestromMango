@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.mangorage'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url = "https://jitpack.io/"
+    }
+    maven {
+        url = "https://repo.hypera.dev/snapshots/"
+    } // spark-minestom
+
+    maven {
+        url = "https://repo.lucko.me/"
+    } // spark-common
+
+    maven {
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    } // spark-common's dependencies
+
+    maven {
+        url = "https://maven.minecraftforge.net/"
+    }
+    maven {
+        url = "https://mvn.everbuild.org/public"
+    }
+    maven {
+        url = uri("https://repo.codemc.io/repository/maven-public/")
+    }
+
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    implementation("net.minestom:minestom-snapshots:1_21_4-f8e052b05c") {
+        version { strictly '1_21_4-f8e052b05c' }
+    }
+    implementation("com.dfsek.terra:minestom:6.6.0-BETA+d0bc006fa")
+
+    implementation project(":server")
+
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+
+    implementation("de.articdive:jnoise:3.0.2")
+    implementation("dev.lu15:spark-minestom:1.10-SNAPSHOT")
+
+}
+
+test {
+    useJUnitPlatform()
+}
