@@ -13,6 +13,8 @@ import net.minestom.server.entity.metadata.monster.zombie.ZombieMeta;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -108,6 +110,13 @@ public class ServerHelper {
             server.getServerProcess()
                     .connection()
                     .setPlayerProvider(MorphingPlayer::new);
+
+            server.getServerProcess()
+                    .eventHandler()
+                    .addListener(PlayerMoveEvent.class, playerEvent -> {
+                        if (playerEvent.getPlayer() instanceof MorphingPlayer player)
+                            player.update();
+                    });
 
             server.getServerProcess()
                     .packetListener()
