@@ -40,6 +40,7 @@ import org.mangorage.servertest.commands.SwitchEntityType;
 import org.mangorage.servertest.commands.TeleportCommand;
 import org.mangorage.servertest.commands.TransferCommand;
 import org.mangorage.servertest.core.Listeners;
+import org.mangorage.servertest.core.registrations.Recipes;
 import org.mangorage.servertest.entities.MorphingPlayer;
 
 import java.util.Timer;
@@ -52,6 +53,7 @@ public class ServerHelper {
             MinecraftServer.setBrandName(sid);
             MinecraftServer.setDifficulty(Difficulty.HARD);
 
+            Recipes.register(server.getCraftingRecipeManager());
             new Listeners(server);
 
             server.getBlockManager().register(server.getServerProcess().eventHandler());

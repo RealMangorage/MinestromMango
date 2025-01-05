@@ -18,16 +18,10 @@ import org.jetbrains.annotations.NotNull;
 import org.mangorage.server.core.MangoServer;
 import org.mangorage.server.recipie.CraftingInventory;
 import org.mangorage.server.recipie.CraftingRecipeManager;
-import org.mangorage.server.recipie.ShapedCraftingRecipe;
-import org.mangorage.server.recipie.ShapelessCraftingRecipe;
 import org.mangorage.server.misc.PlayerUtil;
 
-import java.util.List;
-
-
 public final class Listeners {
-    private final CraftingRecipeManager manager = new CraftingRecipeManager();
-
+    private final CraftingRecipeManager manager;
 
     public void shrinkCrafting(AbstractInventory inv, boolean is3x3) {
         int from = is3x3 ? 1 : 37;
@@ -57,32 +51,7 @@ public final class Listeners {
     }
 
     public Listeners(MangoServer server) {
-
-        manager.register(
-                ShapedCraftingRecipe.create()
-                        .setIngredient(Material.IRON_INGOT).setIngredient(Material.IRON_INGOT).setIngredient(Material.IRON_INGOT)
-                        .skip().setIngredient(Material.STICK).skip()
-                        .skip().setIngredient(Material.STICK).skip()
-                        .build(() -> ItemStack.of(Material.IRON_PICKAXE))
-        );
-
-        manager.register(
-                ShapedCraftingRecipe.create()
-                        .setIngredient(Material.OAK_PLANKS).setIngredient(Material.OAK_PLANKS)
-                        .setIngredient(Material.OAK_PLANKS).setIngredient(Material.OAK_PLANKS)
-                        .build(() -> ItemStack.of(Material.CRAFTING_TABLE))
-        );
-
-
-        manager.register(
-                new ShapelessCraftingRecipe(
-                        List.of(
-                                s -> s.material() == Material.WHITE_WOOL,
-                                s -> s.material() == Material.RED_DYE
-                        ),
-                        () -> ItemStack.of(Material.RED_WOOL, 1)
-                )
-        );
+        this.manager = server.getCraftingRecipeManager();
 
         GlobalEventHandler handler = MinecraftServer.getGlobalEventHandler();
 

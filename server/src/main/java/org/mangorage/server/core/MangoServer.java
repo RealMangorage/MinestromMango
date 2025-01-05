@@ -12,6 +12,9 @@ import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Nullable;
+import org.mangorage.server.misc.PlayerUtil;
+import org.mangorage.server.recipie.CraftingRecipeManager;
+
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +34,11 @@ public class MangoServer {
     }
 
 
-    private final String id;
-    private final Path serverPath;
     private final Random random = new Random();
     private final Map<NamespaceID, InstanceContainer> levels = new HashMap<>();
+    private final CraftingRecipeManager craftingRecipeManager = new CraftingRecipeManager();
+    private final String id;
+    private final Path serverPath;
     private final MinecraftServer server;
     private final ServerProcess serverProcess;
     private final InstanceManager instanceManager;
@@ -72,6 +76,12 @@ public class MangoServer {
             l.saveChunksToStorage();
             consumer.accept(k.asMinimalString());
         });
+        serverProcess
+                .connection()
+                .getOnlinePlayers()
+                .forEach(plr -> {
+                    PlayerUtil.serialize(this, "players", plr);
+                });
     }
 
     public @Nullable InstanceContainer getLevel(NamespaceID id) {
@@ -112,6 +122,10 @@ public class MangoServer {
 
     public MangoBlockManager getBlockManager() {
         return manager;
+    }
+
+    public CraftingRecipeManager getCraftingRecipeManager() {
+        return craftingRecipeManager;
     }
 
     public AnvilLoader createLoader(NamespaceID id) {

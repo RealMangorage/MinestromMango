@@ -21,6 +21,7 @@ public class ShapelessCraftingRecipe implements CraftingRecipe {
         var stacks = inventory.getStacks();
         total: for (Predicate<ItemStack> predicate : predicates) {
             for (ItemStack stack : stacks) {
+                if (stack.isAir()) continue;
                 if (predicate.test(stack))
                     matched++;
                 if (matched >= predicates.size())
