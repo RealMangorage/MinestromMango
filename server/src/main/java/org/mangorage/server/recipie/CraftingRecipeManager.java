@@ -21,12 +21,10 @@ public final class CraftingRecipeManager implements CraftingRecipe {
     public CraftingRecipe createShapeless(Material result, int amount, Material... materials) {
         return new ShapelessCraftingRecipe(
                 Arrays.stream(materials)
-                        .map(material -> Ingredient.of(
-                                List.of(
-                                        ItemStack.of(material)
-                                )
-                        )).toList(),
-                () -> ItemStack.of(result, amount)
+                        .map(material -> Ingredient.of(ItemStack.of(material))).toList(),
+                () -> ItemStack.of(result, amount),
+                materials.length < 4 ? 2 : 3,
+                materials.length < 4 ? 2 : 3
         );
     }
 
@@ -34,8 +32,10 @@ public final class CraftingRecipeManager implements CraftingRecipe {
     public ItemStack getResult(CraftingInput inventory) {
         for (CraftingRecipe recipe : recipes) {
             var result = recipe.getResult(inventory);
-            if (!result.isAir())
+            if (!result.isAir()) {
+                System.out.println(result);
                 return result;
+            }
         }
         return ItemStack.AIR;
     }

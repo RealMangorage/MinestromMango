@@ -4,26 +4,46 @@ import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.item.ItemStack;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public final class CraftingInput {
-    private final AbstractInventory inventory;
+    private final List<ItemStack> items;
     private final Type type;
     private final int count;
 
     public CraftingInput(Type type, AbstractInventory inventory) {
         this.type = type;
-        this.inventory = inventory;
-        this.count = (int) Arrays.stream(getStacks())
-                .filter(stack -> !stack.isAir())
+        this.items = List.of(
+                type.getStacks(inventory)
+        );
+        this.count = (int) items.stream()
+                .filter(s -> s != ItemStack.AIR)
                 .count();
     }
 
-    public ItemStack[] getStacks() {
-        return type.getStacks(inventory);
+    public CraftingInput(Type type, List<ItemStack> stacks) {
+        this.type = type;
+        this.items = stacks;
+        this.count = (int) items.stream()
+                .filter(s -> s != ItemStack.AIR)
+                .count();
+    }
+
+    public List<ItemStack> getStacks() {
+        return items;
     }
 
     public Type getType() {
         return type;
+    }
+
+    public ItemStack getItem(int row, int column) {
+        if (row >= type.width)
+            row = 0;
+        if (column >= type.height)
+            column = 0;
+        return  this.items.get(Math.min(row + column * this.type.width, items.size()));
     }
 
     /**
@@ -33,20 +53,32 @@ public final class CraftingInput {
         return count;
     }
 
+    public int getHeight() {
+        return type.height;
+    }
+
+    public int getWidth() {
+        return type.width;
+    }
+
     public enum Type {
-        CRAFTING_BENCH(9, 1, 10, 0),
-        PLAYER(4, 37, 41, 36);
+        CRAFTING_BENCH(9, 1, 10, 0, 3, 3),
+        PLAYER(4, 37, 41, 36, 2, 2);
 
         final int maxSize;
         final int from;
         final int to;
         final int output;
+        final int height;
+        final int width;
 
-        Type(int maxSize, int from, int to, int output) {
+        Type(int maxSize, int from, int to, int output, int height, int width) {
             this.maxSize = maxSize;
             this.from = from;
             this.to = to;
             this.output = output;
+            this.height = height;
+            this.width = width;
         }
 
         public ItemStack[] getStacks(AbstractInventory inventory) {

@@ -6,6 +6,7 @@ import net.minestom.server.utils.Direction;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public final class Util {
     public static Direction getPlayerFacingDirection(Pos playerPos, boolean skip) {
@@ -48,5 +49,26 @@ public final class Util {
             case SOUTH:
                 yield "z";
         };
+    }
+
+    public static <T> boolean isSymmetrical(int pWidth, int pHeight, List<T> pList) {
+        if (pWidth == 1) {
+            return true;
+        } else {
+            int i = pWidth / 2;
+
+            for (int j = 0; j < pHeight; j++) {
+                for (int k = 0; k < i; k++) {
+                    int l = pWidth - 1 - k;
+                    T t = pList.get(k + j * pWidth);
+                    T t1 = pList.get(l + j * pWidth);
+                    if (!t.equals(t1)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
     }
 }

@@ -8,15 +8,20 @@ import java.util.function.Supplier;
 public class ShapelessCraftingRecipe implements CraftingRecipe {
     private final List<Ingredient> ingredients;
     private final Supplier<ItemStack> result;
+    private final int height;
+    private final int width;
 
-    public ShapelessCraftingRecipe(List<Ingredient> ingredients, Supplier<ItemStack> result) {
+    public ShapelessCraftingRecipe(List<Ingredient> ingredients, Supplier<ItemStack> result, int height, int width) {
         this.ingredients = List.copyOf(ingredients);
         this.result = result;
+        this.height = height;
+        this.width = width;
     }
+
 
     @Override
     public ItemStack getResult(CraftingInput input) {
-        if (input.getCount() == 0 || input.getCount() > ingredients.size())
+        if (input.getHeight() < height || input.getWidth() < width || input.getCount() == 0 || input.getCount() > ingredients.size())
             return ItemStack.AIR;
 
         int matches = 0;
