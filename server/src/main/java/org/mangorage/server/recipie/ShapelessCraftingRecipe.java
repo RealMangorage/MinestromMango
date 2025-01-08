@@ -15,10 +15,14 @@ public class ShapelessCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack getResult(CraftingInput inventory) {
+    public ItemStack getResult(CraftingInput input) {
+        if (input.getCount() == 0 || input.getCount() > ingredients.size())
+            return ItemStack.AIR;
+
         int matches = 0;
         int amount = 0;
-        for (ItemStack stack : inventory.getStacks()) {
+
+        for (ItemStack stack : input.getStacks()) {
             for (Ingredient ingredient : ingredients) {
                 if (ingredient.is(stack))
                     matches++;
@@ -27,9 +31,6 @@ public class ShapelessCraftingRecipe implements CraftingRecipe {
                 amount++;
         }
 
-        if (matches == 0 || matches != amount || matches > ingredients.size())
-            return ItemStack.AIR;
-
-        return result.get();
+        return matches == amount ? result.get() : ItemStack.AIR;
     }
 }
