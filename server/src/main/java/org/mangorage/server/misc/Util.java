@@ -50,25 +50,4 @@ public final class Util {
                 yield "z";
         };
     }
-
-    public static <T> boolean isSymmetrical(int pWidth, int pHeight, List<T> pList) {
-        if (pWidth == 1) {
-            return true;
-        } else {
-            int i = pWidth / 2;
-
-            for (int j = 0; j < pHeight; j++) {
-                for (int k = 0; k < i; k++) {
-                    int l = pWidth - 1 - k;
-                    T t = pList.get(k + j * pWidth);
-                    T t1 = pList.get(l + j * pWidth);
-                    if (!t.equals(t1)) {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-    }
 }
