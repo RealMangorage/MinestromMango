@@ -1,24 +1,68 @@
 package org.mangorage.servertest.core;
 
+import net.goldenstack.loot.LootContext;
+import net.goldenstack.loot.LootEntry;
+import net.goldenstack.loot.LootFunction;
+import net.goldenstack.loot.LootPredicate;
+import net.goldenstack.loot.LootTable;
+import net.goldenstack.loot.Trove;
+import net.goldenstack.loot.util.VanillaInterface;
+import net.goldenstack.loot.util.nbt.NBTReference;
+import net.goldenstack.loot.util.nbt.NBTUtils;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponent;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.event.inventory.InventoryCloseEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.gamedata.tags.TagManager;
+import net.minestom.server.instance.InstanceManager;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.inventory.TransactionOption;
 import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.network.packet.server.play.WorldBorderSizePacket;
+import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mangorage.server.core.MangoServer;
+import org.mangorage.server.misc.Util;
 import org.mangorage.server.recipie.CraftingInput;
 import org.mangorage.server.recipie.CraftingRecipeManager;
 import org.mangorage.server.misc.PlayerUtil;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.function.UnaryOperator;
 
 public final class Listeners {
     private final CraftingRecipeManager manager;
@@ -50,20 +94,86 @@ public final class Listeners {
         return result;
     }
 
+    private static final Map<NamespaceID, LootTable> tables = LootTableHelper.loadInternalLootTable( "loot_tables/blocks");
+
     public Listeners(MangoServer server) {
         this.manager = server.getCraftingRecipeManager();
-
         GlobalEventHandler handler = MinecraftServer.getGlobalEventHandler();
 
+
+        handler.addListener(PickupItemEvent.class, event -> {
+            var entity = event.getEntity();
+            if (entity instanceof Player player) {
+                var ret = player.getInventory().addItemStacks(List.of(event.getItemStack()), TransactionOption.ALL);
+                if (ret.stream().anyMatch(i -> i != ItemStack.AIR))
+                    event.setCancelled(true);
+            } else {
+                event.setCancelled(true);
+            }
+        });
+
+        handler.addListener(ItemDropEvent.class, event -> {
+            Player player = event.getPlayer();
+            ItemStack droppedItem = event.getItemStack();
+
+            ItemEntity itemEntity = new ItemEntity(droppedItem);
+            itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
+            itemEntity.setInstance(player.getInstance());
+            itemEntity.teleport(player.getPosition().add(0, 1.5f, 0));
+
+            Vec velocity = player.getPosition().direction().mul(6);
+            itemEntity.setVelocity(velocity);
+        });
+
         handler.addListener(PlayerBlockBreakEvent.class, event -> {
+            if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+
             var material = Material.fromNamespaceId(event.getBlock().namespace());
             if (material != null) {
-                event.getPlayer().getInventory().addItemStack(
-                        ItemStack.of(
-                                material,
-                                1
-                        )
-                );
+                var held = event.getPlayer().getItemInMainHand();
+                var enchs = held.get(ItemComponent.ENCHANTMENTS);
+                var tool = held.get(ItemComponent.TOOL);
+
+                if (tool.isCorrectForDrops(event.getBlock())) {
+                    Map<LootContext.Key<?>, Object> l = new HashMap<>();
+                    l.put(LootContext.TOOL, event.getPlayer().getItemInMainHand());
+                    l.put(LootContext.BLOCK_STATE, event.getBlock());
+                    l.put(LootContext.RANDOM, server.getRandom());
+
+                    if (enchs.has(Enchantment.FORTUNE)) {
+                        l.put(LootContext.ENCHANTMENT_ACTIVE, false);
+                        l.put(LootContext.ENCHANTMENT_LEVEL, enchs.level(Enchantment.FORTUNE));
+
+                    }
+
+                    tables.get(event.getBlock().namespace()).blockDrop(
+                            LootContext.from(
+                                    VanillaInterface.defaults(),
+                                    l
+                            ),
+                            event.getInstance(),
+                            event.getBlockPosition()
+                    );
+                }
+
+                if (held.has(ItemComponent.DAMAGE)) {
+                    var maxDmg = held.get(ItemComponent.MAX_DAMAGE);
+                    var dmg = held.get(ItemComponent.DAMAGE) + tool.damagePerBlock();
+
+                    if (dmg >= maxDmg) {
+                        event.getPlayer().setItemInMainHand(ItemStack.AIR);
+                        event.getPlayer().playSound(
+                                Sound.sound()
+                                        .type(SoundEvent.ENTITY_ITEM_BREAK)
+                                        .build()
+                        );
+                    } else {
+                        event.getPlayer().setItemInMainHand(
+                                held.with(ItemComponent.DAMAGE, dmg)
+                        );
+                    }
+                }
+
             }
         });
 

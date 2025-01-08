@@ -7,6 +7,7 @@ version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 
     maven {
         url = "https://jitpack.io/"
@@ -50,6 +51,10 @@ dependencies {
 
     implementation("de.articdive:jnoise:3.0.2")
     implementation("dev.lu15:spark-minestom:1.10-SNAPSHOT")
+
+    implementation("org.spongepowered:configurate-gson:+")
+
+    implementation("net.goldenstack.loot:trove:3.0")
 
 }
 
