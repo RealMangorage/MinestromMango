@@ -15,6 +15,7 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.trait.PlayerEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -52,6 +53,7 @@ public class ServerHelper {
         MangoServer.init(sid, server -> {
             MinecraftServer.setBrandName(sid);
             MinecraftServer.setDifficulty(Difficulty.HARD);
+
 
             Recipes.register(server.getCraftingRecipeManager());
             new Listeners(server);

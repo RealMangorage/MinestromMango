@@ -3,31 +3,33 @@ package org.mangorage.server.recipie;
 import net.minestom.server.item.ItemStack;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ShapelessCraftingRecipe implements CraftingRecipe {
-    private final List<Predicate<ItemStack>> predicates;
+    private final List<Ingredient> ingredients;
     private final Supplier<ItemStack> result;
 
-    public ShapelessCraftingRecipe(List<Predicate<ItemStack>> predicates, Supplier<ItemStack> result) {
-        this.predicates = List.copyOf(predicates);
+    public ShapelessCraftingRecipe(List<Ingredient> ingredients, Supplier<ItemStack> result) {
+        this.ingredients = List.copyOf(ingredients);
         this.result = result;
     }
 
     @Override
-    public ItemStack getResult(CraftingInventory inventory) {
-        int matched = 0;
-        var stacks = inventory.getStacks();
-        total: for (Predicate<ItemStack> predicate : predicates) {
-            for (ItemStack stack : stacks) {
-                if (stack.isAir()) continue;
-                if (predicate.test(stack))
-                    matched++;
-                if (matched >= predicates.size())
-                    break total;
+    public ItemStack getResult(CraftingInput inventory) {
+        int matches = 0;
+        int amount = 0;
+        for (ItemStack stack : inventory.getStacks()) {
+            for (Ingredient ingredient : ingredients) {
+                if (ingredient.is(stack))
+                    matches++;
             }
+            if (!stack.isAir())
+                amount++;
         }
-        return matched == predicates.size() ? result.get() : ItemStack.AIR;
+
+        if (matches == 0 || matches != amount || matches > ingredients.size())
+            return ItemStack.AIR;
+
+        return result.get();
     }
 }

@@ -16,7 +16,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.mangorage.server.core.MangoServer;
-import org.mangorage.server.recipie.CraftingInventory;
+import org.mangorage.server.recipie.CraftingInput;
 import org.mangorage.server.recipie.CraftingRecipeManager;
 import org.mangorage.server.misc.PlayerUtil;
 
@@ -44,8 +44,8 @@ public final class Listeners {
     }
 
     public ItemStack updateCraftingView(AbstractInventory inventory, boolean is3x3) {
-        var type = is3x3 ? CraftingInventory.Type.S_3X3 : CraftingInventory.Type.S_2X2;
-        var result = manager.getResult(new CraftingInventory(type, inventory));
+        var type = is3x3 ? CraftingInput.Type.CRAFTING_BENCH : CraftingInput.Type.PLAYER;
+        var result = manager.getResult(new CraftingInput(type, inventory));
         inventory.setItemStack(type.getOutputSlot(), result, true);
         return result;
     }
@@ -94,7 +94,7 @@ public final class Listeners {
             if (event.getInventory() instanceof PlayerInventory playerInventory) {
                 if (event.getSlot() >= 37 && event.getSlot() <= 40) {
                     updateCraftingView(playerInventory, false);
-                } else if (event.getSlot() == 36) {
+                } else if (event.getSlot() == 36 && !event.getClickedItem().isAir()) {
                     var result = updateCraftingView(playerInventory, false); // Verify
                     if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
                         playerInventory.setItemStack(36, event.getClickedItem(), true);
@@ -122,7 +122,7 @@ public final class Listeners {
                 if (inventory.getInventoryType().equals(InventoryType.CRAFTING)) {
                     if (event.getSlot() != 0) {
                         updateCraftingView(inventory, true);
-                    } else if (event.getSlot() == 0) {
+                    } else if (event.getSlot() == 0 && !event.getClickedItem().isAir()) {
                         var result = updateCraftingView(inventory, true); // Verify
                         if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
                             inventory.setItemStack(0, event.getClickedItem(), true);

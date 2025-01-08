@@ -5,11 +5,11 @@ import net.minestom.server.item.ItemStack;
 
 import java.util.Arrays;
 
-public final class CraftingInventory {
+public final class CraftingInput {
     private final AbstractInventory inventory;
     private final Type type;
 
-    public CraftingInventory(Type type, AbstractInventory inventory) {
+    public CraftingInput(Type type, AbstractInventory inventory) {
         this.type = type;
         this.inventory = inventory;
     }
@@ -23,8 +23,8 @@ public final class CraftingInventory {
     }
 
     public enum Type {
-        S_3X3(9, 1, 10, 0),
-        S_2X2(4, 37, 41, 36);
+        CRAFTING_BENCH(9, 1, 10, 0),
+        PLAYER(4, 37, 41, 36);
 
         final int maxSize;
         final int from;

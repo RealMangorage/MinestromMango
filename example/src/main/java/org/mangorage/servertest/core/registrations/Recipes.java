@@ -1,37 +1,16 @@
 package org.mangorage.servertest.core.registrations;
 
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.recipe.Recipe;
 import net.minestom.server.utils.NamespaceID;
 import org.mangorage.server.recipie.CraftingRecipe;
 import org.mangorage.server.recipie.CraftingRecipeManager;
-import org.mangorage.server.recipie.ShapedCraftingRecipe;
-import org.mangorage.server.recipie.ShapelessCraftingRecipe;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public final class Recipes {
     public static void register(CraftingRecipeManager manager) {
-        manager.register(
-                ShapedCraftingRecipe.create()
-                        .setIngredient(Material.IRON_INGOT).setIngredient(Material.IRON_INGOT).setIngredient(Material.IRON_INGOT)
-                        .skip().setIngredient(Material.STICK).skip()
-                        .skip().setIngredient(Material.STICK).skip()
-                        .build(() -> ItemStack.of(Material.IRON_PICKAXE))
-        );
-
-        manager.register(
-                ShapedCraftingRecipe.create()
-                        .setIngredient(Material.OAK_PLANKS).setIngredient(Material.OAK_PLANKS)
-                        .setIngredient(Material.OAK_PLANKS).setIngredient(Material.OAK_PLANKS)
-                        .build(() -> ItemStack.of(Material.CRAFTING_TABLE))
-        );
-
         List<RecipeGenerator<? extends BasicGenerator>> generators = new ArrayList<>();
 
         generators.add(new RecipeGenerator<>(

@@ -6,7 +6,6 @@ import net.minestom.server.item.Material;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 public final class CraftingRecipeManager implements CraftingRecipe {
     private final List<CraftingRecipe> recipes = new ArrayList<>();
@@ -16,27 +15,23 @@ public final class CraftingRecipeManager implements CraftingRecipe {
     }
 
     public void registerShapeless(Material result, int amount, Material... materials) {
-        register(
-                new ShapelessCraftingRecipe(
-                        Arrays.stream(materials)
-                                .map(m -> (Predicate<ItemStack>) itemStack -> itemStack.material() == m)
-                                .toList(),
-                        () -> ItemStack.of(result, amount)
-                )
-        );
+        register(createShapeless(result, amount, materials));
     }
 
     public CraftingRecipe createShapeless(Material result, int amount, Material... materials) {
         return new ShapelessCraftingRecipe(
-                        Arrays.stream(materials)
-                                .map(m -> (Predicate<ItemStack>) itemStack -> itemStack.material() == m)
-                                .toList(),
-                        () -> ItemStack.of(result, amount)
-                );
+                Arrays.stream(materials)
+                        .map(material -> Ingredient.of(
+                                List.of(
+                                        ItemStack.of(material)
+                                )
+                        )).toList(),
+                () -> ItemStack.of(result, amount)
+        );
     }
 
     @Override
-    public ItemStack getResult(CraftingInventory inventory) {
+    public ItemStack getResult(CraftingInput inventory) {
         for (CraftingRecipe recipe : recipes) {
             var result = recipe.getResult(inventory);
             if (!result.isAir())
