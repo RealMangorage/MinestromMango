@@ -43,6 +43,7 @@ public class MangoServer {
     private final ServerProcess serverProcess;
     private final InstanceManager instanceManager;
     private final MangoBlockManager manager;
+    private final LootTableManager lootTables;
 
     private MangoServer(String id) {
         this.id = id;
@@ -51,6 +52,7 @@ public class MangoServer {
         this.serverProcess = MinecraftServer.process();
         this.instanceManager = serverProcess.instance();
         this.manager = new MangoBlockManager(serverProcess);
+        this.lootTables = new LootTableManager();
 
         Path directory = Path.of("spark");
         SparkMinestom.builder(directory)
@@ -143,5 +145,9 @@ public class MangoServer {
 
     public Random getRandom() {
         return random;
+    }
+
+    public LootTableManager getLootTables() {
+        return lootTables;
     }
 }

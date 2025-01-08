@@ -35,7 +35,9 @@ import org.mangorage.servertest.block.placement.AxisBlockPlacementRule;
 import org.mangorage.servertest.block.placement.FacingBlockPlacementRule;
 import org.mangorage.servertest.block.placement.FencePlacementRule;
 import org.mangorage.servertest.block.placement.GravityBlockPlacementRule;
+import org.mangorage.servertest.commands.EnchantCommand;
 import org.mangorage.servertest.commands.GameModeCommand;
+import org.mangorage.servertest.commands.GiveCommand;
 import org.mangorage.servertest.commands.SaveAllCommand;
 import org.mangorage.servertest.commands.SwitchEntityType;
 import org.mangorage.servertest.commands.TeleportCommand;
@@ -222,7 +224,9 @@ public class ServerHelper {
                             new GameModeCommand(),
                             new SaveAllCommand(server),
                             new TeleportCommand(server),
-                            new SwitchEntityType(server)
+                            new SwitchEntityType(server),
+                            new GiveCommand(server),
+                            new EnchantCommand(server)
                     );
 
             server.start(port);
