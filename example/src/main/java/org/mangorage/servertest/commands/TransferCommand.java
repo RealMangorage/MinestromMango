@@ -11,15 +11,16 @@ public class TransferCommand extends Command {
 
         var portArgument = ArgumentType.Integer("port");
 
-        addSyntax((sender, context) -> {
-            if (sender instanceof Player player) {
-                player.sendPacket(
-                        new TransferPacket(
-                                "127.0.0.1", 25566
-                        )
-                );
-                player.getPlayerConnection().disconnect();
-            }
-        }, portArgument);
+        addSyntax(
+                (sender, context) -> {
+                    if (sender instanceof Player player) {
+                        player.sendPacket(
+                                new TransferPacket(
+                                        "127.0.0.1", 25566
+                                )
+                        );
+                        player.getPlayerConnection().disconnect();
+                    }
+                }, portArgument);
     }
 }

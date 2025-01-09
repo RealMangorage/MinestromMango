@@ -25,6 +25,7 @@ public class MorphingPlayer extends Player {
                         .build()
         );
         getTeam().addMember(gameProfile.name());
+        //setPermissionLevel(3);
     }
 
 

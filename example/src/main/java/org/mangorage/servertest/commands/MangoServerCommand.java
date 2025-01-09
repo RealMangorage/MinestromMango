@@ -16,6 +16,7 @@ public class MangoServerCommand extends Command {
     public MangoServerCommand(MangoServer server, @NotNull String name) {
         super(name);
         this.server = server;
+        setCondition(Conditions.CHEATS_NEEDED);
     }
 
     public final MangoServer getServer() {
