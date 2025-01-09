@@ -14,30 +14,7 @@ import java.util.function.BiPredicate;
 
 public final class Recipes {
     public static void register(CraftingRecipeManager manager) {
-        List<RecipeGenerator<? extends BasicGenerator>> generators = new ArrayList<>();
 
-        generators.add(new RecipeGenerator<>(
-                (material, id) -> manager.createShapeless(
-                        Material.fromNamespaceId(
-                                id.asString()
-                                        .replace("_log", "_planks")
-                                        .replace("stripped_", "")
-                        ),
-                        4,
-                        material
-                ),
-                (material, id) -> id.path().contains("_log")
-        ));
-
-        Material.values().stream()
-                .forEach(material -> {
-                    generators.forEach(generator -> {
-                        var recipe = generator.create(material, material.namespace());
-                        if (recipe != null) {
-                            manager.register(recipe);
-                        }
-                    });
-                });
 
         manager.register(
                 new ShapedRecipe(

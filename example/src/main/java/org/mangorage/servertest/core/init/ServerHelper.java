@@ -44,6 +44,7 @@ import org.mangorage.servertest.commands.TeleportCommand;
 import org.mangorage.servertest.commands.TransferCommand;
 import org.mangorage.servertest.core.Listeners;
 import org.mangorage.servertest.core.registrations.Recipes;
+import org.mangorage.servertest.data.DataCraftRecipe;
 import org.mangorage.servertest.entities.MorphingPlayer;
 
 import java.util.Timer;
@@ -58,6 +59,11 @@ public class ServerHelper {
 
 
             Recipes.register(server.getCraftingRecipeManager());
+            DataCraftRecipe.getRecipes(
+                    server.getServerPath().resolve("data/recipe"),
+                    server
+            );
+
             new Listeners(server);
 
             server.getBlockManager().register(server.getServerProcess().eventHandler());

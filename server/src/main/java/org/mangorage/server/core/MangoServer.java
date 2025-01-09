@@ -52,7 +52,7 @@ public class MangoServer {
         this.serverProcess = MinecraftServer.process();
         this.instanceManager = serverProcess.instance();
         this.manager = new MangoBlockManager(serverProcess);
-        this.lootTables = new LootTableManager();
+        this.lootTables = new LootTableManager(serverPath.resolve("data/loot_table"));
 
         Path directory = Path.of("spark");
         SparkMinestom.builder(directory)

@@ -11,6 +11,10 @@ import java.util.Objects;
 public final class Ingredient {
     public static final Ingredient EMPTY = of(ItemStack.AIR);
 
+    public static Ingredient of(List<ItemStack> stacks) {
+        return new Ingredient(List.copyOf(stacks));
+    }
+
     public static Ingredient of(ItemStack... stacks) {
         return new Ingredient(List.of(stacks));
     }
@@ -37,6 +41,15 @@ public final class Ingredient {
             if (itemStack.isSimilar(stack))
                 return true;
         }
+        return false;
+    }
+
+    public boolean hasAir() {
+        for (ItemStack stack : stacks) {
+            if (stack.isAir())
+                return true;
+        }
+
         return false;
     }
 

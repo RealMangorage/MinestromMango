@@ -2,6 +2,7 @@ package org.mangorage.server.recipie;
 
 import net.minestom.server.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -16,26 +17,31 @@ public class ShapelessCraftingRecipe implements CraftingRecipe {
         this.result = result;
         this.height = height;
         this.width = width;
-    }
 
+        // Ensure no AIR is present in the ingredients
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.hasAir()) {
+                throw new IllegalArgumentException("Ingredients cannot include AIR");
+            }
+        }
+    }
 
     @Override
     public ItemStack getResult(CraftingInput input) {
-        if (input.getHeight() < height || input.getWidth() < width || input.getCount() == 0 || input.getCount() > ingredients.size())
-            return ItemStack.AIR;
+        List<ItemStack> inputStacks = new ArrayList<>(input.getStacks()); // Make a mutable copy of the input stacks
+        List<Ingredient> unmatchedIngredients = new ArrayList<>(ingredients); // Track unmatched ingredients
 
-        int matches = 0;
-        int amount = 0;
+        // Attempt to match each input stack to an ingredient
+        for (ItemStack stack : inputStacks) {
+            if (stack.isAir()) continue; // Skip AIR stacks
 
-        for (ItemStack stack : input.getStacks()) {
-            for (Ingredient ingredient : ingredients) {
-                if (ingredient.is(stack))
-                    matches++;
+            boolean matched = unmatchedIngredients.removeIf(ingredient -> ingredient.is(stack));
+            if (!matched) {
+                return ItemStack.AIR; // If a stack doesn't match any ingredient, return AIR
             }
-            if (!stack.isAir())
-                amount++;
         }
 
-        return matches == amount ? result.get() : ItemStack.AIR;
+        // If all ingredients are matched, return the result
+        return unmatchedIngredients.isEmpty() ? result.get() : ItemStack.AIR;
     }
 }
