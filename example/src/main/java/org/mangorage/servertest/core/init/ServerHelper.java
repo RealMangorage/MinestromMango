@@ -39,6 +39,7 @@ import org.mangorage.servertest.commands.EnchantCommand;
 import org.mangorage.servertest.commands.GameModeCommand;
 import org.mangorage.servertest.commands.GiveCommand;
 import org.mangorage.servertest.commands.SaveAllCommand;
+import org.mangorage.servertest.commands.SummonCommand;
 import org.mangorage.servertest.commands.SwitchEntityType;
 import org.mangorage.servertest.commands.TeleportCommand;
 import org.mangorage.servertest.commands.TransferCommand;
@@ -232,7 +233,8 @@ public class ServerHelper {
                             new TeleportCommand(server),
                             new SwitchEntityType(server),
                             new GiveCommand(server),
-                            new EnchantCommand(server)
+                            new EnchantCommand(server),
+                            new SummonCommand(server)
                     );
 
             server.start(port);

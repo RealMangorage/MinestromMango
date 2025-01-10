@@ -7,6 +7,7 @@ import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
+import net.minestom.server.utils.location.RelativeVec;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 
@@ -59,4 +60,15 @@ public final class Util {
         };
     }
 
+    public static Pos getRelatiivePos(RelativeVec relativeVec, Pos pos) {
+        final Vec rel = relativeVec.from(new Pos(0, 0, 0));
+
+        return new Pos(
+                relativeVec.isRelativeX() ? pos.x() + rel.x() : rel.x(),
+                relativeVec.isRelativeY() ? pos.y() + rel.y() : rel.y(),
+                relativeVec.isRelativeZ() ? pos.z() + rel.z() : rel.z(),
+                pos.yaw(),
+                pos.pitch()
+        );
+    }
 }

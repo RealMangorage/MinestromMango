@@ -5,6 +5,7 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
@@ -25,7 +26,7 @@ public class MorphingPlayer extends Player {
                         .build()
         );
         getTeam().addMember(gameProfile.name());
-        //setPermissionLevel(3);
+        setPermissionLevel(3);
     }
 
 
