@@ -1,5 +1,6 @@
 package org.mangorage.servertest.core.nodes;
 
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mangorage.server.core.MangoServer;
 import org.mangorage.server.recipie.CraftingInput;
 import org.mangorage.server.recipie.CraftingRecipeManager;
+import org.mangorage.servertest.inventory.MenuHandler;
 
 public final class DefaultInventoryHandler {
 
@@ -46,10 +48,87 @@ public final class DefaultInventoryHandler {
     }
 
     public static EventNode<Event> register(MangoServer server) {
+        MenuHandler PLAYER_MENU_HANDLER = new MenuHandler()
+                .putCancellableAction(36, (inventory, clickType, slot, player, cursor) -> {
+                    if (clickType != ClickType.LEFT_CLICK) return true;
+                    var stack = inventory.getItemStack(slot);
+                    if (inventory.getItemStack(slot).material() == cursor.material()) {
+                        if (stack.amount() + cursor.amount() > cursor.maxStackSize()) return true;
+                        return false;
+                    }
+                    return !cursor.isAir();
+                })
+                .putAction(37, 40, (inventory, clickType, slot, player, cursor) -> {
+                    updateCraftingView(server.getCraftingRecipeManager(), inventory, false);
+                })
+                .putAction(36, (inventory, clickType, slot, player, cursor) -> {
+                    if (clickType == ClickType.LEFT_CLICK) {
+                        var result = updateCraftingView(server.getCraftingRecipeManager(), inventory, false);
+                        if (cursor.isAir() || cursor.material() == result.material()) {
+                            if (cursor.isAir()) {
+                                player.getInventory().setCursorItem(result);
+                                inventory.setItemStack(slot, ItemStack.AIR, true);
+                                shrinkCrafting(inventory, false);
+                                updateCraftingView(server.getCraftingRecipeManager(), inventory, false);
+                            } else if (!(cursor.amount() + result.amount() > result.maxStackSize())) {
+                                player.getInventory().setCursorItem(cursor.withAmount(cursor.amount() + result.amount()));
+                                inventory.setItemStack(slot, ItemStack.AIR, true);
+                                shrinkCrafting(inventory, false);
+                                updateCraftingView(server.getCraftingRecipeManager(), inventory, false);
+                            }
+                        }
+                    }
+                });
+
+        MenuHandler CRAFTING_MENU_HANDLER = new MenuHandler()
+                .putCancellableAction(0, (inventory, clickType, slot, player, cursor) -> {
+                    if (clickType != ClickType.LEFT_CLICK) return true;
+                    var stack = inventory.getItemStack(slot);
+                    if (inventory.getItemStack(slot).material() == cursor.material()) {
+                        if (stack.amount() + cursor.amount() > cursor.maxStackSize()) return true;
+                        return false;
+                    }
+                    return !cursor.isAir();
+                })
+                .putAction(1, 9, (inventory, clickType, slot, player, cursor) -> {
+                    updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
+                })
+                .putAction(0, (inventory, clickType, slot, player, cursor) -> {
+                    if (clickType == ClickType.LEFT_CLICK) {
+                        var result = updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
+                        if (cursor.isAir() || cursor.material() == result.material()) {
+                            if (cursor.isAir()) {
+                                player.getInventory().setCursorItem(result);
+                                inventory.setItemStack(slot, ItemStack.AIR, true);
+                                shrinkCrafting(inventory, true);
+                                updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
+                            } else if (!(cursor.amount() + result.amount() > result.maxStackSize())) {
+                                player.getInventory().setCursorItem(cursor.withAmount(cursor.amount() + result.amount()));
+                                inventory.setItemStack(slot, ItemStack.AIR, true);
+                                shrinkCrafting(inventory, true);
+                                updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
+                            }
+                        }
+                    }
+                });
+
         return EventNode.all("default-inventory-handler")
                 .addListener(InventoryPreClickEvent.class, event -> {
                     if (event.getClickType() == ClickType.SHIFT_CLICK)
                         event.setCancelled(true);
+
+                    if (event.getInventory() instanceof PlayerInventory) {
+                        event.setCancelled(
+                                PLAYER_MENU_HANDLER.processPreClick(event)
+                        );
+                    } else if (event.getInventory() instanceof Inventory inventory) {
+                        var type = inventory.getInventoryType();
+                        if (type == InventoryType.CRAFTING) {
+                            event.setCancelled(
+                                    CRAFTING_MENU_HANDLER.processPreClick(event)
+                            );
+                        }
+                    }
                 })
                 .addListener(InventoryCloseEvent.class, event -> {
                     if (event.getInventory() instanceof Inventory inventory) {
@@ -59,65 +138,12 @@ public final class DefaultInventoryHandler {
                     }
                 })
                 .addListener(InventoryClickEvent.class, event -> {
-                    // 37 -> 40
-
-                    // 36 Output
-                    if (event.getInventory() instanceof PlayerInventory playerInventory) {
-                        if (event.getSlot() >= 37 && event.getSlot() <= 40) {
-                            updateCraftingView(server.getCraftingRecipeManager(), playerInventory, false);
-                        } else if (event.getSlot() == 36 && !event.getClickedItem().isAir()) {
-                            var result = updateCraftingView(server.getCraftingRecipeManager(), playerInventory, false); // Verify
-                            if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
-                                playerInventory.setItemStack(36, event.getClickedItem(), true);
-                                playerInventory.setCursorItem(event.getCursorItem());
-                                return;
-                            } else if (!event.getCursorItem().isAir()) {
-                                if ( (event.getCursorItem().amount() + result.amount()) > result.material().maxStackSize()) {
-                                    playerInventory.setItemStack(36, event.getClickedItem(), true);
-                                    playerInventory.setCursorItem(event.getCursorItem());
-                                    return;
-                                } else {
-                                    playerInventory.setCursorItem(
-                                            ItemStack.of(
-                                                    result.material(),
-                                                    event.getCursorItem().amount() + result.amount()
-                                            )
-                                    );
-                                }
-                            }
-                            shrinkCrafting(playerInventory, false);
-                            playerInventory.setItemStack(36, ItemStack.AIR, true);
-                            updateCraftingView(server.getCraftingRecipeManager(), playerInventory, false);
-                        }
+                    if (event.getInventory() instanceof PlayerInventory) {
+                        PLAYER_MENU_HANDLER.processClick(event);
                     } else if (event.getInventory() instanceof Inventory inventory) {
-                        if (inventory.getInventoryType().equals(InventoryType.CRAFTING)) {
-                            if (event.getSlot() != 0) {
-                                updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
-                            } else if (event.getSlot() == 0 && !event.getClickedItem().isAir()) {
-                                var result = updateCraftingView(server.getCraftingRecipeManager(), inventory, true); // Verify
-                                if (event.getCursorItem().material() != result.material() && !event.getCursorItem().isAir()) {
-                                    inventory.setItemStack(0, event.getClickedItem(), true);
-                                    inventory.setCursorItem(event.getPlayer(), event.getCursorItem());
-                                    return;
-                                } else if (!event.getCursorItem().isAir()) {
-                                    if ( (event.getCursorItem().amount() + result.amount()) > result.material().maxStackSize()) {
-                                        inventory.setItemStack(0, event.getClickedItem(), true);
-                                        inventory.setCursorItem(event.getPlayer(), event.getCursorItem());
-                                        return;
-                                    } else {
-                                        inventory.setCursorItem(
-                                                event.getPlayer(),
-                                                ItemStack.of(
-                                                        result.material(),
-                                                        event.getCursorItem().amount() + result.amount()
-                                                )
-                                        );
-                                    }
-                                }
-                                shrinkCrafting(inventory, true);
-                                inventory.setItemStack(0, ItemStack.AIR, true);
-                                updateCraftingView(server.getCraftingRecipeManager(), inventory, true);
-                            }
+                        var type = inventory.getInventoryType();
+                        if (type == InventoryType.CRAFTING) {
+                            CRAFTING_MENU_HANDLER.processClick(event);
                         }
                     }
                 });
